@@ -18,16 +18,19 @@ logic. It only calls the Kaelix HTTP API configured by the user.
 ## Screenshots
 
 The MCP adapter is designed to control a self-hosted Kaelix Dashboard instance
-like the one below. Screenshots may show an earlier dashboard theme while the
-Kaelix rename is still in progress.
+like the one below (fully Kaelix-branded UI, English interface).
 
 ![Kaelix dashboard overview](docs/images/dashboard.png)
 
-| Approvals                                           | Code review                                             |
-| --------------------------------------------------- | ------------------------------------------------------- |
-| ![Kaelix approvals view](docs/images/approvals.png) | ![Kaelix code review view](docs/images/code-review.png) |
+| Agents                                     | Tasks                                    |
+| ------------------------------------------- | ----------------------------------------- |
+| ![Kaelix agents view](docs/images/agents.png) | ![Kaelix tasks view](docs/images/tasks.png) |
 
-![Kaelix inspector view](docs/images/inspector.png)
+| Relay (chat/approvals cockpit)              | Local AI (Ollama)                             |
+| -------------------------------------------- | ---------------------------------------------- |
+| ![Kaelix Relay view](docs/images/relay.png) | ![Kaelix Local AI view](docs/images/local-ai.png) |
+
+![Kaelix Settings — MCP service-token config](docs/images/settings-mcp.png)
 
 ## Architecture
 
@@ -156,22 +159,37 @@ exist.
 | `kaelix_local_ai_models`    | `GET`  | `/local-ai/models`          | Required | No                                           |
 | `kaelix_local_ai_test_chat` | `POST` | `/local-ai/test-chat`       | Required | Sends a local model test prompt              |
 
-## Backend Token Recommendation
+## Backend Service-Token Auth (Implemented)
 
-For a polished public release, add a backend service-token auth path:
+The Kaelix Dashboard backend supports service-token auth for MCP clients. Set
+in the dashboard's `.env`:
 
 ```env
 KAELIX_MCP_TOKEN=generated-secret
 ```
 
-Then allow requests with:
+Then requests with this header are accepted on every endpoint the web
+dashboard's cookie session can reach:
 
 ```http
 Authorization: Bearer generated-secret
 ```
 
-Only expose the minimal MCP-safe endpoints. Keep browser cookie auth for the web
-dashboard.
+If `KAELIX_MCP_TOKEN` is unset or empty, Bearer-token auth is disabled entirely
+(cookie login keeps working as before — this does not change the web
+dashboard's auth). Check whether it's configured (never returns the token
+itself) via:
+
+```http
+GET /api/auth/mcp-status
+-> { "enabled": true, "auth_type": "bearer" }
+```
+
+Generate a token locally, never commit it:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
 
 ## Open-Source Boundary
 
@@ -187,8 +205,8 @@ examples. It should not contain private dashboard internals.
 
 ## Public Release Checklist
 
-- Add backend service-token support.
+- [x] Add backend service-token support.
 - Confirm every tool maps to a stable dashboard API endpoint.
-- Add screenshots or short GIFs to the public README.
+- [x] Add screenshots to the public README.
 - Publish as `kaelix-mcp` or a scoped package such as `@kaelix/mcp`.
 - Keep `.env`, tokens, cookies, and dashboard databases out of the repo.
