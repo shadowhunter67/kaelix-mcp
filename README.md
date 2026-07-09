@@ -22,12 +22,12 @@ like the one below (fully Kaelix-branded UI, English interface).
 
 ![Kaelix dashboard overview](docs/images/dashboard.png)
 
-| Agents                                     | Tasks                                    |
-| ------------------------------------------- | ----------------------------------------- |
+| Agents                                        | Tasks                                       |
+| --------------------------------------------- | ------------------------------------------- |
 | ![Kaelix agents view](docs/images/agents.png) | ![Kaelix tasks view](docs/images/tasks.png) |
 
-| Relay (chat/approvals cockpit)              | Local AI (Ollama)                             |
-| -------------------------------------------- | ---------------------------------------------- |
+| Relay (chat/approvals cockpit)              | Local AI (Ollama)                                 |
+| ------------------------------------------- | ------------------------------------------------- |
 | ![Kaelix Relay view](docs/images/relay.png) | ![Kaelix Local AI view](docs/images/local-ai.png) |
 
 ![Kaelix Settings — MCP service-token config](docs/images/settings-mcp.png)
