@@ -42,8 +42,13 @@ MCP client
 - Node.js 22.6 or newer
 - A running Kaelix backend, usually `http://localhost:8000/api`
 - Auth for that backend:
-  - preferred: `KAELIX_API_TOKEN` once the backend supports MCP service tokens
-  - temporary local fallback: `KAELIX_SESSION_COOKIE`
+  - preferred: `KAELIX_API_TOKEN` service-token auth
+  - temporary local fallback only: `KAELIX_SESSION_COOKIE`
+- Optional timeout override: `KAELIX_TIMEOUT_MS` defaults to `20000`
+
+> `KAELIX_SESSION_COOKIE` is for local development only. Do not use cookie auth
+> on shared machines, remote MCP servers, CI, synced config folders, or public
+> examples.
 
 ## Install For Local Development
 
@@ -51,6 +56,7 @@ MCP client
 cd MCP
 npm install
 npm run build
+npm test
 ```
 
 ## MCP Client Config
@@ -115,19 +121,38 @@ After publishing this package to npm, users can use `npx` instead:
 - `kaelix_list_agents`: list dashboard agents.
 - `kaelix_list_tasks`: list tasks.
 - `kaelix_get_task`: get one task by id.
-- `kaelix_create_task`: create a task.
-- `kaelix_run_task`: enqueue a task.
-- `kaelix_approve_task`: approve a reviewing task.
+- `kaelix_create_task`: create a pending task. This writes to the dashboard database.
+- `kaelix_run_task`: enqueue a task. This can trigger model/tool activity through the dashboard backend.
+- `kaelix_approve_task`: approve a reviewing task after output inspection.
 - `kaelix_reject_task`: reject a reviewing task.
 - `kaelix_provider_health`: get provider health and cooldown state.
 - `kaelix_local_ai_status`: check Ollama/local AI status if the dashboard exposes it.
 - `kaelix_local_ai_models`: list local models if the dashboard exposes it.
 - `kaelix_local_ai_test_chat`: send a short local model test prompt if supported.
 
+Tool errors are returned as MCP-friendly JSON with `ok: false`, `error.kind`,
+`error.status`, `error.path`, and a short message.
+
 The `local_ai` tools require matching `/api/local-ai/*` endpoints in the
 dashboard backend. Keep them in the adapter so the public MCP contract is ready,
 but expect them to fail with a clear API error until those backend endpoints
 exist.
+
+## API Contract
+
+| Tool | Method | Backend path | Auth | Side effect |
+| --- | --- | --- | --- | --- |
+| `kaelix_list_agents` | `GET` | `/agents` | Required | No |
+| `kaelix_list_tasks` | `GET` | `/tasks` | Required | No |
+| `kaelix_get_task` | `GET` | `/tasks/:taskId` | Required | No |
+| `kaelix_create_task` | `POST` | `/tasks` | Required | Creates a pending task |
+| `kaelix_run_task` | `POST` | `/tasks/:taskId/run` | Required | Queues task execution |
+| `kaelix_approve_task` | `POST` | `/tasks/:taskId/approve` | Required | Approves reviewed output |
+| `kaelix_reject_task` | `POST` | `/tasks/:taskId/reject` | Required | Rejects reviewed output |
+| `kaelix_provider_health` | `GET` | `/settings/provider-health` | Required | No |
+| `kaelix_local_ai_status` | `GET` | `/local-ai/status` | Required | No |
+| `kaelix_local_ai_models` | `GET` | `/local-ai/models` | Required | No |
+| `kaelix_local_ai_test_chat` | `POST` | `/local-ai/test-chat` | Required | Sends a local model test prompt |
 
 ## Backend Token Recommendation
 

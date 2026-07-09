@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "kaelix": {
+      "command": "npx",
+      "args": ["kaelix-mcp"],
+      "env": {
+        "KAELIX_API_URL": "http://localhost:8000/api",
+        "KAELIX_API_TOKEN": "replace-with-dashboard-service-token"
+      }
+    }
+  }
+}

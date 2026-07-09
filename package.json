@@ -4,18 +4,44 @@
   "description": "MCP adapter for self-hosted Kaelix Dashboard instances.",
   "type": "module",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shadowhunter67/kaelix-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shadowhunter67/kaelix-mcp/issues"
+  },
+  "homepage": "https://github.com/shadowhunter67/kaelix-mcp#readme",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "kaelix",
+    "ai-agents",
+    "self-hosted",
+    "dashboard"
+  ],
   "bin": {
     "kaelix-mcp": "dist/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./client": "./dist/client.js"
   },
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "SECURITY.md",
+    "CHANGELOG.md",
+    "examples",
+    "docs/images"
   ],
   "scripts": {
     "build": "tsc",
     "dev": "node --experimental-strip-types src/index.ts",
+    "prepublishOnly": "npm run typecheck && npm run build && npm test",
     "start": "node dist/index.js",
+    "test": "npm run build && node --test test/*.test.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
