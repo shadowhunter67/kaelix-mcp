@@ -5,6 +5,12 @@
 Kaelix MCP Adapter lets Claude, Codex, Cursor, and other MCP clients control a
 self-hosted Kaelix Dashboard instance through tools.
 
+## Project Status
+
+This is a personal project and an early MCP adapter for Kaelix. It is under
+active development, so tools, API contracts, and setup steps may change. Public
+testing, bug reports, and feedback are welcome.
+
 This adapter is intentionally small and safe to open-source. It does not include
 the Kaelix dashboard frontend, backend, database, prompts, or private business
 logic. It only calls the Kaelix HTTP API configured by the user.
