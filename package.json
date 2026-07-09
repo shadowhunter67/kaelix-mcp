@@ -4,6 +4,11 @@
   "description": "MCP adapter for self-hosted Kaelix Dashboard instances.",
   "type": "module",
   "license": "MIT",
+  "packageManager": "npm@11.13.0",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shadowhunter67/kaelix-mcp.git"

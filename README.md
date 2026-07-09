@@ -203,10 +203,48 @@ kaelix-mcp/         public adapter
 The public adapter should contain API contracts, tool definitions, docs, and
 examples. It should not contain private dashboard internals.
 
+## CI/CD
+
+This repository has two GitHub Actions workflows:
+
+- `CI`: runs on pushes and pull requests to `main`.
+- `Release`: verifies the package, creates an npm tarball artifact, and can
+  publish to npm.
+
+The release pipeline runs:
+
+```bash
+npm ci
+npm run format:check
+npm run typecheck
+npm run build
+npm test
+npm pack
+```
+
+To publish `kaelix-mcp` to npm:
+
+1. Create an npm automation token.
+2. Add it to GitHub repository secrets as `NPM_TOKEN`.
+3. Ensure `package.json` has the version you want to publish.
+4. Create a GitHub Release, for example `v0.1.0`, or run the `Release`
+   workflow manually with `publish_npm=true`.
+
+The publish step uses npm provenance:
+
+```bash
+npm publish --provenance --access public
+```
+
+If `NPM_TOKEN` is missing, manual runs with `publish_npm=false` still verify
+and upload a package artifact. GitHub Release publishes require `NPM_TOKEN`.
+
 ## Public Release Checklist
 
 - [x] Add backend service-token support.
-- Confirm every tool maps to a stable dashboard API endpoint.
+- [x] Confirm every tool maps to a stable dashboard API endpoint.
 - [x] Add screenshots to the public README.
-- Publish as `kaelix-mcp` or a scoped package such as `@kaelix/mcp`.
-- Keep `.env`, tokens, cookies, and dashboard databases out of the repo.
+- [x] Add CI for format, typecheck, build, and tests.
+- [x] Add release workflow with npm package artifact.
+- [ ] Add `NPM_TOKEN` and publish `kaelix-mcp` to npm.
+- [x] Keep `.env`, tokens, cookies, and dashboard databases out of the repo.
