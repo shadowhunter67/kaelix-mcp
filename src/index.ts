@@ -2,7 +2,21 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { KaelixApiError, createClientFromEnv } from "./client.js";
+import { createClientFromEnv } from "./client.js";
+import {
+  approveTask,
+  createTask,
+  getTask,
+  jsonText,
+  listAgents,
+  listTasks,
+  localAiModels,
+  localAiStatus,
+  localAiTestChat,
+  providerHealth,
+  rejectTask,
+  runTask,
+} from "./tools.js";
 
 const client = createClientFromEnv();
 
@@ -10,43 +24,6 @@ const server = new McpServer({
   name: "kaelix-mcp",
   version: "0.1.0",
 });
-
-function jsonText(value: unknown) {
-  return {
-    content: [
-      {
-        type: "text" as const,
-        text: JSON.stringify(value, null, 2),
-      },
-    ],
-  };
-}
-
-async function safeTool<T>(operation: () => Promise<T>) {
-  try {
-    return jsonText(await operation());
-  } catch (error) {
-    const message =
-      error instanceof KaelixApiError
-        ? {
-            ok: false,
-            error: {
-              kind: error.kind,
-              status: error.status,
-              path: error.path,
-              message: error.message,
-            },
-          }
-        : {
-            ok: false,
-            error: {
-              kind: "unexpected",
-              message: error instanceof Error ? error.message : String(error),
-            },
-          };
-    return jsonText(message);
-  }
-}
 
 server.tool(
   "kaelix_server_info",
@@ -67,11 +44,11 @@ server.tool(
 );
 
 server.tool("kaelix_list_agents", "List agents from the Kaelix dashboard.", {}, async () => {
-  return safeTool(() => client.request("/agents"));
+  return listAgents(client);
 });
 
 server.tool("kaelix_list_tasks", "List tasks from the Kaelix dashboard.", {}, async () => {
-  return safeTool(() => client.request("/tasks"));
+  return listTasks(client);
 });
 
 server.tool(
@@ -80,7 +57,7 @@ server.tool(
   {
     taskId: z.string().min(1).describe("Kaelix task id"),
   },
-  async ({ taskId }) => safeTool(() => client.request(`/tasks/${encodeURIComponent(taskId)}`)),
+  async ({ taskId }) => getTask(client, { taskId }),
 );
 
 server.tool(
@@ -91,19 +68,10 @@ server.tool(
     description: z.string().optional().describe("Task details"),
     priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
     assignedAgentId: z.string().optional().describe("Optional agent id"),
+    idempotencyKey: z.string().optional().describe("Optional idempotency key forwarded as Idempotency-Key."),
+    dryRun: z.boolean().default(false).describe("Preview the request without writing to the dashboard."),
   },
-  async ({ title, description, priority, assignedAgentId }) =>
-    safeTool(() =>
-      client.request("/tasks", {
-        method: "POST",
-        body: JSON.stringify({
-          title,
-          description,
-          priority,
-          assigned_agent_id: assignedAgentId,
-        }),
-      }),
-    ),
+  async (args) => createTask(client, args),
 );
 
 server.tool(
@@ -111,13 +79,10 @@ server.tool(
   "Queue an existing task for execution by its assigned agent. This can trigger external model/tool activity through the dashboard backend.",
   {
     taskId: z.string().min(1).describe("Kaelix task id"),
+    idempotencyKey: z.string().optional().describe("Optional idempotency key forwarded as Idempotency-Key."),
+    dryRun: z.boolean().default(false).describe("Preview the request without queueing the task."),
   },
-  async ({ taskId }) =>
-    safeTool(() =>
-      client.request(`/tasks/${encodeURIComponent(taskId)}/run`, {
-        method: "POST",
-      }),
-    ),
+  async (args) => runTask(client, args),
 );
 
 server.tool(
@@ -125,13 +90,9 @@ server.tool(
   "Approve a task that is waiting for human review. Use only when the task output has been inspected and accepted.",
   {
     taskId: z.string().min(1).describe("Kaelix task id"),
+    comment: z.string().optional().describe("Optional audit comment explaining the approval."),
   },
-  async ({ taskId }) =>
-    safeTool(() =>
-      client.request(`/tasks/${encodeURIComponent(taskId)}/approve`, {
-        method: "POST",
-      }),
-    ),
+  async (args) => approveTask(client, args),
 );
 
 server.tool(
@@ -139,26 +100,32 @@ server.tool(
   "Reject a task that is waiting for human review. Use when the output should not be accepted.",
   {
     taskId: z.string().min(1).describe("Kaelix task id"),
+    reason: z.string().min(1).describe("Required audit reason for rejecting the task output."),
   },
-  async ({ taskId }) =>
-    safeTool(() =>
-      client.request(`/tasks/${encodeURIComponent(taskId)}/reject`, {
-        method: "POST",
-      }),
-    ),
+  async (args) => rejectTask(client, args),
 );
 
 server.tool("kaelix_provider_health", "Get configured provider health and cooldown state.", {}, async () => {
-  return safeTool(() => client.request("/settings/provider-health"));
+  return providerHealth(client);
 });
 
-server.tool("kaelix_local_ai_status", "Check local AI/Ollama status if the dashboard exposes local-ai endpoints.", {}, async () => {
-  return safeTool(() => client.request("/local-ai/status"));
-});
+server.tool(
+  "kaelix_local_ai_status",
+  "Check local AI/Ollama status if the dashboard exposes local-ai endpoints.",
+  {},
+  async () => {
+    return localAiStatus(client);
+  },
+);
 
-server.tool("kaelix_local_ai_models", "List local AI/Ollama models if the dashboard exposes local-ai endpoints.", {}, async () => {
-  return safeTool(() => client.request("/local-ai/models"));
-});
+server.tool(
+  "kaelix_local_ai_models",
+  "List local AI/Ollama models if the dashboard exposes local-ai endpoints.",
+  {},
+  async () => {
+    return localAiModels(client);
+  },
+);
 
 server.tool(
   "kaelix_local_ai_test_chat",
@@ -167,13 +134,7 @@ server.tool(
     model: z.string().min(1).describe("Local model name"),
     prompt: z.string().min(1).max(4000).describe("Short prompt to send to the local model"),
   },
-  async ({ model, prompt }) =>
-    safeTool(() =>
-      client.request("/local-ai/test-chat", {
-        method: "POST",
-        body: JSON.stringify({ model, prompt }),
-      }),
-    ),
+  async (args) => localAiTestChat(client, args),
 );
 
 const transport = new StdioServerTransport();

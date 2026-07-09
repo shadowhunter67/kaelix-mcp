@@ -23,8 +23,8 @@ Kaelix rename is still in progress.
 
 ![Kaelix dashboard overview](docs/images/dashboard.png)
 
-| Approvals | Code review |
-| --- | --- |
+| Approvals                                           | Code review                                             |
+| --------------------------------------------------- | ------------------------------------------------------- |
 | ![Kaelix approvals view](docs/images/approvals.png) | ![Kaelix code review view](docs/images/code-review.png) |
 
 ![Kaelix inspector view](docs/images/inspector.png)
@@ -44,7 +44,7 @@ MCP client
 - A running Kaelix backend, usually `http://localhost:8000/api`
 - Auth for that backend:
   - preferred: `KAELIX_API_TOKEN` service-token auth
-  - temporary local fallback only: `KAELIX_SESSION_COOKIE`
+  - temporary local fallback only: `KAELIX_ALLOW_COOKIE_AUTH=true` plus `KAELIX_SESSION_COOKIE`
 - Optional timeout override: `KAELIX_TIMEOUT_MS` defaults to `20000`
 
 > `KAELIX_SESSION_COOKIE` is for local development only. Do not use cookie auth
@@ -90,6 +90,7 @@ If the dashboard still uses only cookie login, use a local-only cookie fallback:
       "args": ["/absolute/path/to/kaelix/MCP/dist/index.js"],
       "env": {
         "KAELIX_API_URL": "http://localhost:8000/api",
+        "KAELIX_ALLOW_COOKIE_AUTH": "true",
         "KAELIX_SESSION_COOKIE": "kaelix_session=..."
       }
     }
@@ -124,8 +125,8 @@ After publishing this package to npm, users can use `npx` instead:
 - `kaelix_get_task`: get one task by id.
 - `kaelix_create_task`: create a pending task. This writes to the dashboard database.
 - `kaelix_run_task`: enqueue a task. This can trigger model/tool activity through the dashboard backend.
-- `kaelix_approve_task`: approve a reviewing task after output inspection.
-- `kaelix_reject_task`: reject a reviewing task.
+- `kaelix_approve_task`: approve a reviewing task after output inspection. Accepts optional `comment`.
+- `kaelix_reject_task`: reject a reviewing task. Requires `reason`.
 - `kaelix_provider_health`: get provider health and cooldown state.
 - `kaelix_local_ai_status`: check Ollama/local AI status if the dashboard exposes it.
 - `kaelix_local_ai_models`: list local models if the dashboard exposes it.
@@ -141,19 +142,19 @@ exist.
 
 ## API Contract
 
-| Tool | Method | Backend path | Auth | Side effect |
-| --- | --- | --- | --- | --- |
-| `kaelix_list_agents` | `GET` | `/agents` | Required | No |
-| `kaelix_list_tasks` | `GET` | `/tasks` | Required | No |
-| `kaelix_get_task` | `GET` | `/tasks/:taskId` | Required | No |
-| `kaelix_create_task` | `POST` | `/tasks` | Required | Creates a pending task |
-| `kaelix_run_task` | `POST` | `/tasks/:taskId/run` | Required | Queues task execution |
-| `kaelix_approve_task` | `POST` | `/tasks/:taskId/approve` | Required | Approves reviewed output |
-| `kaelix_reject_task` | `POST` | `/tasks/:taskId/reject` | Required | Rejects reviewed output |
-| `kaelix_provider_health` | `GET` | `/settings/provider-health` | Required | No |
-| `kaelix_local_ai_status` | `GET` | `/local-ai/status` | Required | No |
-| `kaelix_local_ai_models` | `GET` | `/local-ai/models` | Required | No |
-| `kaelix_local_ai_test_chat` | `POST` | `/local-ai/test-chat` | Required | Sends a local model test prompt |
+| Tool                        | Method | Backend path                | Auth     | Side effect                                  |
+| --------------------------- | ------ | --------------------------- | -------- | -------------------------------------------- |
+| `kaelix_list_agents`        | `GET`  | `/agents`                   | Required | No                                           |
+| `kaelix_list_tasks`         | `GET`  | `/tasks`                    | Required | No                                           |
+| `kaelix_get_task`           | `GET`  | `/tasks/:taskId`            | Required | No                                           |
+| `kaelix_create_task`        | `POST` | `/tasks`                    | Required | Creates a pending task                       |
+| `kaelix_run_task`           | `POST` | `/tasks/:taskId/run`        | Required | Queues task execution                        |
+| `kaelix_approve_task`       | `POST` | `/tasks/:taskId/approve`    | Required | Approves reviewed output, optional `comment` |
+| `kaelix_reject_task`        | `POST` | `/tasks/:taskId/reject`     | Required | Rejects reviewed output, required `reason`   |
+| `kaelix_provider_health`    | `GET`  | `/settings/provider-health` | Required | No                                           |
+| `kaelix_local_ai_status`    | `GET`  | `/local-ai/status`          | Required | No                                           |
+| `kaelix_local_ai_models`    | `GET`  | `/local-ai/models`          | Required | No                                           |
+| `kaelix_local_ai_test_chat` | `POST` | `/local-ai/test-chat`       | Required | Sends a local model test prompt              |
 
 ## Backend Token Recommendation
 

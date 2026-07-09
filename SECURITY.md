@@ -7,6 +7,8 @@ MCP tools. Treat its credentials like production secrets.
 
 - Prefer `KAELIX_API_TOKEN` service-token auth.
 - Keep browser cookie auth for local development only.
+- `KAELIX_SESSION_COOKIE` is ignored unless `KAELIX_ALLOW_COOKIE_AUTH=true` is
+  also set.
 - Do not use `KAELIX_SESSION_COOKIE` on shared machines, remote MCP servers, CI,
   synced config folders, or public examples.
 - Do not commit `.env`, tokens, cookies, logs with headers, or dashboard

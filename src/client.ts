@@ -5,6 +5,7 @@ export interface KaelixClientOptions {
   baseUrl: string;
   apiToken?: string;
   sessionCookie?: string;
+  allowCookieAuth?: boolean;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
 }
@@ -34,7 +35,7 @@ export class KaelixClient {
   constructor(options: KaelixClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");
     this.apiToken = options.apiToken;
-    this.sessionCookie = options.sessionCookie;
+    this.sessionCookie = options.allowCookieAuth ? options.sessionCookie : undefined;
     this.timeoutMs = options.timeoutMs ?? 20_000;
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.authMode = this.apiToken ? "bearer" : this.sessionCookie ? "cookie" : "none";
@@ -105,6 +106,7 @@ export function createClientFromEnv(): KaelixClient {
     baseUrl: process.env.KAELIX_API_URL || "http://localhost:8000/api",
     apiToken: process.env.KAELIX_API_TOKEN,
     sessionCookie: process.env.KAELIX_SESSION_COOKIE,
+    allowCookieAuth: process.env.KAELIX_ALLOW_COOKIE_AUTH === "true",
     timeoutMs: Number(process.env.KAELIX_TIMEOUT_MS || 20_000),
   });
 }

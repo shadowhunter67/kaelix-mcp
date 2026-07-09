@@ -30,6 +30,7 @@ test("supports local-dev cookie auth", async () => {
   const client = new KaelixClient({
     baseUrl: "http://localhost:8000/api",
     sessionCookie: "kaelix_session=abc",
+    allowCookieAuth: true,
     fetchImpl: async (_url, init) => {
       seenCookie = new Headers(init?.headers).get("Cookie") || "";
       return response("{}", { status: 200 });
@@ -38,6 +39,22 @@ test("supports local-dev cookie auth", async () => {
 
   await client.request("/tasks");
   assert.equal(seenCookie, "kaelix_session=abc");
+});
+
+test("ignores cookie auth unless explicitly enabled", async () => {
+  let seenCookie = "unset";
+  const client = new KaelixClient({
+    baseUrl: "http://localhost:8000/api",
+    sessionCookie: "kaelix_session=abc",
+    fetchImpl: async (_url, init) => {
+      seenCookie = new Headers(init?.headers).get("Cookie") || "";
+      return response("{}", { status: 200 });
+    },
+  });
+
+  await client.request("/tasks");
+  assert.equal(client.authMode, "none");
+  assert.equal(seenCookie, "");
 });
 
 test("returns undefined for 204 responses", async () => {
@@ -52,7 +69,8 @@ test("returns undefined for 204 responses", async () => {
 test("classifies auth errors", async () => {
   const client = new KaelixClient({
     baseUrl: "http://localhost:8000/api",
-    fetchImpl: async () => response('{"detail":"Not authenticated"}', { status: 401, statusText: "Unauthorized" }),
+    fetchImpl: async () =>
+      response('{"detail":"Not authenticated"}', { status: 401, statusText: "Unauthorized" }),
   });
 
   await assert.rejects(client.request("/agents"), (error) => {
@@ -89,6 +107,22 @@ test("turns network failures into friendly errors", async () => {
     assert.equal(error instanceof KaelixApiError, true);
     assert.equal(error.kind, "network");
     assert.match(error.message, /Could not reach/);
+    return true;
+  });
+});
+
+test("turns AbortError failures into timeout errors", async () => {
+  const client = new KaelixClient({
+    baseUrl: "http://localhost:8000/api",
+    fetchImpl: async () => {
+      throw Object.assign(new Error("Aborted"), { name: "AbortError" });
+    },
+  });
+
+  await assert.rejects(client.request("/agents"), (error) => {
+    assert.equal(error instanceof KaelixApiError, true);
+    assert.equal(error.kind, "timeout");
+    assert.match(error.message, /timed out/);
     return true;
   });
 });
