@@ -1,11 +1,26 @@
 # Kaelix MCP Adapter
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Kaelix MCP Adapter lets Claude, Codex, Cursor, and other MCP clients control a
 self-hosted Kaelix Dashboard instance through tools.
 
 This adapter is intentionally small and safe to open-source. It does not include
 the Kaelix dashboard frontend, backend, database, prompts, or private business
 logic. It only calls the Kaelix HTTP API configured by the user.
+
+## Screenshots
+
+The MCP adapter is designed to control a self-hosted Kaelix Dashboard instance
+like the one below.
+
+![Kaelix dashboard overview](docs/images/dashboard.png)
+
+| Agents | Relay |
+| --- | --- |
+| ![Kaelix agents view](docs/images/agents.png) | ![Kaelix relay view](docs/images/relay.png) |
+
+![Kaelix provider settings](docs/images/providers.png)
 
 ## Architecture
 
