@@ -18,15 +18,16 @@ logic. It only calls the Kaelix HTTP API configured by the user.
 ## Screenshots
 
 The MCP adapter is designed to control a self-hosted Kaelix Dashboard instance
-like the one below.
+like the one below. Screenshots may show an earlier dashboard theme while the
+Kaelix rename is still in progress.
 
 ![Kaelix dashboard overview](docs/images/dashboard.png)
 
-| Agents | Relay |
+| Approvals | Code review |
 | --- | --- |
-| ![Kaelix agents view](docs/images/agents.png) | ![Kaelix relay view](docs/images/relay.png) |
+| ![Kaelix approvals view](docs/images/approvals.png) | ![Kaelix code review view](docs/images/code-review.png) |
 
-![Kaelix provider settings](docs/images/providers.png)
+![Kaelix inspector view](docs/images/inspector.png)
 
 ## Architecture
 
