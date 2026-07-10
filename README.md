@@ -20,7 +20,7 @@ change. Bug reports, setup feedback, and pull requests are welcome.
 Current release:
 
 - npm package: `kaelix-mcp`
-- latest version: `0.1.0`
+- latest version: see the npm version badge above
 - license: MIT
 - runtime: Node.js 22.6 or newer
 
