@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { KaelixApiError, KaelixClient } from "../dist/client.js";
+import { createClientFromEnv, KaelixApiError, KaelixClient } from "../dist/client.js";
 
 function response(body, init = {}) {
   return new Response(init.status === 204 ? null : body, init);
@@ -125,4 +125,27 @@ test("turns AbortError failures into timeout errors", async () => {
     assert.match(error.message, /timed out/);
     return true;
   });
+});
+
+test("warns when cookie auth is enabled without a bearer token", () => {
+  const originalEnv = { ...process.env };
+  const originalWarn = console.warn;
+  const warnings = [];
+
+  try {
+    process.env.KAELIX_API_URL = "http://localhost:8000/api";
+    delete process.env.KAELIX_API_TOKEN;
+    process.env.KAELIX_ALLOW_COOKIE_AUTH = "true";
+    process.env.KAELIX_SESSION_COOKIE = "kaelix_session=abc";
+    console.warn = (message) => warnings.push(String(message));
+
+    const client = createClientFromEnv();
+
+    assert.equal(client.authMode, "cookie");
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0], /local development only/);
+  } finally {
+    process.env = originalEnv;
+    console.warn = originalWarn;
+  }
 });

@@ -17,12 +17,13 @@ import {
   rejectTask,
   runTask,
 } from "./tools.js";
+import { ADAPTER_VERSION } from "./version.js";
 
 const client = createClientFromEnv();
 
 const server = new McpServer({
   name: "kaelix-mcp",
-  version: "0.1.0",
+  version: ADAPTER_VERSION,
 });
 
 server.tool(
@@ -32,7 +33,7 @@ server.tool(
   async () =>
     jsonText({
       adapter: "kaelix-mcp",
-      version: "0.1.0",
+      version: ADAPTER_VERSION,
       apiUrl: client.baseUrl,
       authMode: client.authMode,
       timeoutMs: client.timeoutMs,

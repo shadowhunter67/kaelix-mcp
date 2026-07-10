@@ -102,11 +102,25 @@ export class KaelixClient {
 }
 
 export function createClientFromEnv(): KaelixClient {
+  const allowCookieAuth = process.env.KAELIX_ALLOW_COOKIE_AUTH === "true";
+  const sessionCookie = process.env.KAELIX_SESSION_COOKIE;
+  const apiToken = process.env.KAELIX_API_TOKEN;
+
+  if (allowCookieAuth && sessionCookie && !apiToken) {
+    console.warn(
+      [
+        "KAELIX_ALLOW_COOKIE_AUTH=true is enabled.",
+        "Cookie auth is intended for local development only.",
+        "Prefer KAELIX_API_TOKEN for shared, remote, or production MCP use.",
+      ].join(" "),
+    );
+  }
+
   return new KaelixClient({
     baseUrl: process.env.KAELIX_API_URL || "http://localhost:8000/api",
-    apiToken: process.env.KAELIX_API_TOKEN,
-    sessionCookie: process.env.KAELIX_SESSION_COOKIE,
-    allowCookieAuth: process.env.KAELIX_ALLOW_COOKIE_AUTH === "true",
+    apiToken,
+    sessionCookie,
+    allowCookieAuth,
     timeoutMs: Number(process.env.KAELIX_TIMEOUT_MS || 20_000),
   });
 }

@@ -13,6 +13,9 @@ MCP tools. Treat its credentials like production secrets.
   synced config folders, or public examples.
 - Do not commit `.env`, tokens, cookies, logs with headers, or dashboard
   databases.
+- Treat production readiness as a backend responsibility: enforce scoped tokens,
+  audit MCP-triggered write actions, rate limit per token/tool, and keep token
+  rotation/revocation available.
 
 ## Reporting Issues
 

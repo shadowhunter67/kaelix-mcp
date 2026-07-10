@@ -37,6 +37,20 @@ The adapter exposes Kaelix Dashboard actions as MCP tools:
 Write tools can change dashboard state. MCP clients and users should treat this
 adapter like an automation client with real side effects.
 
+## Production Readiness
+
+This adapter is suitable for public testing and self-hosted development. For
+production use, the Kaelix backend should enforce real guardrails:
+
+- scoped MCP tokens instead of one all-powerful bearer token
+- audit logs for every MCP-triggered write action
+- human confirmation for sensitive task execution and review decisions
+- rate limits by token and tool
+- backend idempotency handling for retried write requests
+
+The adapter intentionally stays thin. Authorization, audit, and policy
+enforcement should live in the dashboard backend.
+
 ## Screenshots
 
 The MCP adapter is designed to control a self-hosted Kaelix Dashboard instance
@@ -76,7 +90,9 @@ KAELIX_SESSION_COOKIE=kaelix_session=...
 ```
 
 Do not use cookie auth on shared machines, CI, remote MCP servers, synced config
-folders, or public examples. Never publish real tokens or cookies.
+folders, or public examples. Never publish real tokens or cookies. When cookie
+auth is enabled without `KAELIX_API_TOKEN`, the adapter writes a warning to
+stderr at startup.
 
 ## Quick Start
 
