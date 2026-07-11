@@ -56,6 +56,14 @@ const RETRYABLE_METHODS = new Set(["GET", "HEAD"]);
 const MAX_RETRY_ATTEMPTS = 2; // total attempts, not additional retries
 const MAX_RETRY_AFTER_WAIT_MS = 5_000;
 
+function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+  return value.slice(0, end);
+}
+
 export class KaelixClient {
   readonly baseUrl: string;
   readonly authMode: AuthMode;
@@ -68,7 +76,7 @@ export class KaelixClient {
   private readonly fetchImpl: typeof fetch;
 
   constructor(options: KaelixClientOptions) {
-    this.baseUrl = options.baseUrl.replace(/\/+$/, "");
+    this.baseUrl = trimTrailingSlashes(options.baseUrl);
     this.allowedHosts = options.allowedHosts;
     this.baseUrlObj = validateApiUrl(this.baseUrl, { allowedHosts: this.allowedHosts });
     this.apiToken = options.apiToken;
