@@ -1,0 +1,10 @@
+# Codex CLI reads MCP server config from ~/.codex/config.toml.
+# Append this block (adjust values), then restart Codex.
+
+[mcp_servers.kaelix]
+command = "npx"
+args = ["-y", "kaelix-mcp"]
+
+[mcp_servers.kaelix.env]
+KAELIX_API_URL = "http://localhost:8000/api"
+KAELIX_API_TOKEN = "replace-with-service-token"
