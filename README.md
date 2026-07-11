@@ -552,6 +552,7 @@ npm run lint
 npm run typecheck
 npm run build
 npm test
+npm run test:integration
 npm audit --omit=dev
 npm pack
 ```
@@ -564,10 +565,13 @@ npm publish --provenance --access public
 
 Requirements for publishing:
 
-- GitHub repository must be public when provenance is enabled.
-- GitHub secret `NPM_TOKEN` must exist.
-- npm token must have package read/write permission.
-- If npm 2FA is enabled, the token must support publish automation.
+- The GitHub repository and npm package must be public for provenance.
+- npm Trusted Publisher must authorize the GitHub Actions workflow in
+  `.github/workflows/release.yml` with the `npm publish` permission.
+- The publish job must have `id-token: write`; no npm access token is stored in
+  GitHub Actions.
+- Package publishing access disallows tokens, so releases can only publish
+  through the configured OIDC trust or an interactive npm account with 2FA.
 
 ## Public Release Checklist
 
@@ -579,7 +583,8 @@ Requirements for publishing:
       `npm pack --dry-run`, across a Node 22.x/24.x matrix.
 - [x] Add release workflow with npm package artifact and the same quality
       gates as CI.
-- [x] Add `NPM_TOKEN` and publish `kaelix-mcp` to npm.
+- [x] Configure npm OIDC trusted publishing with provenance and publish
+      `kaelix-mcp` without a stored npm token.
 - [x] Keep `.env`, tokens, cookies, and dashboard databases out of the repo
       (verified via `npm pack --dry-run` tarball contents).
 - [x] SSRF/TLS validation for `KAELIX_API_URL` and redirect targets.
