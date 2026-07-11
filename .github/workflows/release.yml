@@ -29,9 +29,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run format:check
+      - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
       - run: npm test
+      - run: npm run test:integration
+      - run: npm audit --omit=dev
       - run: npm pack
       - uses: actions/upload-artifact@v7
         with:
@@ -52,9 +55,12 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: npm ci
       - run: npm run format:check
+      - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
       - run: npm test
+      - run: npm run test:integration
+      - run: npm audit --omit=dev
       - name: Check npm token
         shell: bash
         env:

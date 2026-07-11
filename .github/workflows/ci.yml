@@ -6,17 +6,29 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # engines.node requires >=22.6.0; 22.x is the active LTS line this
+        # adapter targets, 24.x is current so regressions surface early.
+        node-version: ["22.x", "24.x"]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
       - run: npm run format:check
+      - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
       - run: npm test
+      - run: npm run test:integration
+      - run: npm audit --omit=dev
+      - run: npm pack --dry-run
