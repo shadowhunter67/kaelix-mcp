@@ -26,6 +26,14 @@ test("builds API URL and bearer auth header", async () => {
   assert.deepEqual(result, { ok: true });
 });
 
+test("trims a long trailing-slash suffix in linear time", () => {
+  const client = new KaelixClient({
+    baseUrl: `http://localhost:8000/api${"/".repeat(100_000)}`,
+  });
+
+  assert.equal(client.baseUrl, "http://localhost:8000/api");
+});
+
 test("supports local-dev cookie auth", async () => {
   let seenCookie = "";
   const client = new KaelixClient({
