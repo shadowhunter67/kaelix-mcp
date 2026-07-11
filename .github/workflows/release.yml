@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       publish_npm:
-        description: "Publish to npm. Requires NPM_TOKEN repository secret."
+        description: "Publish to npm using the configured OIDC trusted publisher."
         required: true
         default: "false"
         type: choice
@@ -16,7 +16,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   verify:
@@ -46,13 +45,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: verify
     if: github.event_name == 'release' || inputs.publish_npm == 'true'
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
-          registry-url: https://registry.npmjs.org
+      - name: Install npm with trusted-publishing support
+        run: npm install --global npm@11.13.0
       - run: npm ci
       - run: npm run format:check
       - run: npm run lint
@@ -61,16 +64,14 @@ jobs:
       - run: npm test
       - run: npm run test:integration
       - run: npm audit --omit=dev
-      - name: Check npm token
+      - name: Verify release tag matches package version
+        if: github.event_name == 'release'
         shell: bash
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "NPM_TOKEN repository secret is required to publish." >&2
+          package_version="$(node -p "require('./package.json').version")"
+          if [ "${{ github.event.release.tag_name }}" != "v${package_version}" ]; then
+            echo "Release tag ${{ github.event.release.tag_name }} does not match package version v${package_version}." >&2
             exit 1
           fi
       - name: Publish to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --provenance --access public
