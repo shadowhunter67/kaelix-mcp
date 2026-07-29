@@ -38,7 +38,7 @@ test("supports local-dev cookie auth", async () => {
   let seenCookie = "";
   const client = new KaelixClient({
     baseUrl: "http://localhost:8000/api",
-    sessionCookie: "kaelix_session=abc",
+    sessionCookie: "dash_session=abc",
     allowCookieAuth: true,
     fetchImpl: async (_url, init) => {
       seenCookie = new Headers(init?.headers).get("Cookie") || "";
@@ -47,14 +47,14 @@ test("supports local-dev cookie auth", async () => {
   });
 
   await client.request("/tasks");
-  assert.equal(seenCookie, "kaelix_session=abc");
+  assert.equal(seenCookie, "dash_session=abc");
 });
 
 test("ignores cookie auth unless explicitly enabled", async () => {
   let seenCookie = "unset";
   const client = new KaelixClient({
     baseUrl: "http://localhost:8000/api",
-    sessionCookie: "kaelix_session=abc",
+    sessionCookie: "dash_session=abc",
     fetchImpl: async (_url, init) => {
       seenCookie = new Headers(init?.headers).get("Cookie") || "";
       return response("{}", { status: 200 });
@@ -72,7 +72,7 @@ test("prefers bearer token and never sends the cookie when both are configured",
   const client = new KaelixClient({
     baseUrl: "http://localhost:8000/api",
     apiToken: "token-123",
-    sessionCookie: "kaelix_session=abc",
+    sessionCookie: "dash_session=abc",
     allowCookieAuth: true,
     fetchImpl: async (_url, init) => {
       const headers = new Headers(init?.headers);
@@ -347,7 +347,7 @@ test("warns when cookie auth is enabled without a bearer token", () => {
     process.env.KAELIX_API_URL = "http://localhost:8000/api";
     delete process.env.KAELIX_API_TOKEN;
     process.env.KAELIX_ALLOW_COOKIE_AUTH = "true";
-    process.env.KAELIX_SESSION_COOKIE = "kaelix_session=abc";
+    process.env.KAELIX_SESSION_COOKIE = "dash_session=abc";
     console.warn = (message) => warnings.push(String(message));
 
     const client = createClientFromEnv();

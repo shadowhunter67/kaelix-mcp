@@ -113,7 +113,7 @@ of the two is a startup configuration error, not a silent partial-auth state:
 
 ```env
 KAELIX_ALLOW_COOKIE_AUTH=true
-KAELIX_SESSION_COOKIE=kaelix_session=...
+KAELIX_SESSION_COOKIE=dash_session=...
 ```
 
 If both `KAELIX_API_TOKEN` and cookie auth are configured, the adapter always

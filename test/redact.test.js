@@ -9,8 +9,16 @@ test("redacts bearer tokens from free text", () => {
 });
 
 test("redacts Cookie headers from free text", () => {
-  const out = redactSecrets("Request failed. Cookie: kaelix_session=super-secret-value; Path=/");
+  const out = redactSecrets("Request failed. Cookie: dash_session=super-secret-value; Path=/");
   assert.equal(out.includes("super-secret-value"), false);
+});
+
+test("redacts bare dash_session=value pairs without a Cookie: prefix", () => {
+  // Kaelix's real session cookie name (backend/app/auth.py:COOKIE_NAME) — this pattern
+  // is the only line of defense when the raw cookie value is echoed outside a "Cookie:"
+  // header (e.g. inside an error message or a logged fetch() call).
+  const out = redactSecrets("fetch failed for dash_session=super-secret-value2 while polling /api/tasks");
+  assert.equal(out.includes("super-secret-value2"), false);
 });
 
 test("redacts key=value style secrets", () => {

@@ -49,7 +49,7 @@ test("loadConfig requires KAELIX_SESSION_COOKIE when cookie auth is opted in", (
 });
 
 test("loadConfig ignores the cookie unless both opt-in flag and cookie are set", () => {
-  withEnv({ KAELIX_SESSION_COOKIE: "kaelix_session=abc" }, () => {
+  withEnv({ KAELIX_SESSION_COOKIE: "dash_session=abc" }, () => {
     const config = loadConfig();
     assert.equal(config.allowCookieAuth, false);
     assert.equal(config.sessionCookie, undefined);
@@ -57,10 +57,10 @@ test("loadConfig ignores the cookie unless both opt-in flag and cookie are set",
 });
 
 test("loadConfig accepts cookie auth when both flag and cookie are present", () => {
-  withEnv({ KAELIX_ALLOW_COOKIE_AUTH: "true", KAELIX_SESSION_COOKIE: "kaelix_session=abc" }, () => {
+  withEnv({ KAELIX_ALLOW_COOKIE_AUTH: "true", KAELIX_SESSION_COOKIE: "dash_session=abc" }, () => {
     const config = loadConfig();
     assert.equal(config.allowCookieAuth, true);
-    assert.equal(config.sessionCookie, "kaelix_session=abc");
+    assert.equal(config.sessionCookie, "dash_session=abc");
   });
 });
 

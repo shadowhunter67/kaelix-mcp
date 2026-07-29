@@ -27,7 +27,7 @@ import { detectCapabilities } from "../../dist/capabilities.js";
 import { createRecorder, recordRequest, sendJson, startMockServer } from "./mock-server.mjs";
 
 const FIXTURE_TOKEN = "fixture-bearer-token-not-real";
-const FIXTURE_COOKIE = "kaelix_session=fixture-cookie-value-not-real";
+const FIXTURE_COOKIE = "dash_session=fixture-cookie-value-not-real";
 
 function fixtureTask(overrides = {}) {
   return {

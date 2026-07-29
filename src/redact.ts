@@ -2,7 +2,7 @@ const SECRET_PATTERNS: RegExp[] = [
   /Bearer\s+[A-Za-z0-9._~+/=-]{8,}/gi,
   /Authorization:\s*\S+/gi,
   /Cookie:\s*\S+/gi,
-  /kaelix_session=[^\s;"']+/gi,
+  /dash_session=[^\s;"']+/gi,
   /(?:api[_-]?key|token|secret|password)["']?\s*[:=]\s*["']?[A-Za-z0-9._~+/=-]{8,}/gi,
 ];
 
